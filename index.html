@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Promesas en JavaScript</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      margin: 20px;
+      background: #f9f9f9;
+      color: #333;
+    }
+    .card {
+      border: 1px solid #ccc;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .button {
+      padding: 10px 20px;
+      background: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    .button:hover {
+      background: #45a049;
+    }
+    .result {
+      margin-top: 20px;
+      padding: 10px;
+      background: #e3f2fd;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎓 Entendiendo JavaScript Promesas</h1>
+
+  <div class="card">
+    <h2>1. Promise.race()</h2>
+    <p>Devuelve una promesa que se resuelve o se rechaza con el resultado de la primera promesa que se complete (ya sea con éxito o con error). <br>
+        por ejemplo con estas 3 promesas: <br>
+        const promesa1 = new Promise((resolve) => setTimeout(resolve, 1000, '🐢 Lento')); <br>
+        const promesa2 = new Promise((resolve) => setTimeout(resolve, 500, '🐇 Rápido')); <br>
+        const promesa3 = new Promise((resolve, reject) => setTimeout(reject, 300, '❌ Error')) ; <br>
+    </p>
+    <button class="button" onclick="runRaceExample(this)">Ejecutar Ejemplo</button>
+    <div class="result"></div>
+  </div>
+
+  <div class="card">
+    <h2>2. Promise.any()</h2>
+    <p>Devuelve una promesa que se resuelve con el primer valor exitoso. Ignora los errores a menos que todas las promesas fallen. <br>
+        por ejemplo con estas 3 promesas: <br>
+        const promesa1 = new Promise((_, reject) => setTimeout(reject, 300, '❌ Error 1'));<br>
+    const promesa2 = new Promise((resolve) => setTimeout(resolve, 500, '🎉 Éxito 2')); <br>
+    const promesa3 = new Promise((_, reject) => setTimeout(reject, 700, '❌ Error 3'));<br>
+    </p>
+    <button class="button" onclick="runAnyExample(this)">Ejecutar Ejemplo</button>
+    <div class="result"></div>
+  </div>
+
+  <div class="card">
+    <h2>3. Promise.all()</h2>
+    <p>Espera a que todas las promesas se resuelvan o una falle.
+        Si todas tienen éxito, devuelve un array con los resultados. Si una falla, se rechaza con ese error. <br>
+        por ejemplo con estas 3 promesas: <br>
+        const promesa1 = new Promise((resolve) => setTimeout(resolve, 1000, '✅ Éxito 1'));
+        <br>
+        const promesa2 = new Promise((resolve) => setTimeout(resolve, 500, '✅ Éxito 2'));
+        <br>
+        const promesa3 = new Promise((_, reject) => setTimeout(reject, 300, '❌ Falló 3'));
+        <br>
+    </p>
+    <button class="button" onclick="runAllExample(this)">Ejecutar Ejemplo</button>
+    <div class="result"></div>
+  </div>
+
+  <script>
+    function runRaceExample(button) {
+      const p1 = new Promise((resolve) => setTimeout(resolve, 1000, '🐢 Lento'));
+      const p2 = new Promise((resolve) => setTimeout(resolve, 500, '🐇 Rápido'));
+      const p3 = new Promise((_, reject) => setTimeout(reject, 300, '❌ Error'));
+
+      const resultDiv = button.nextElementSibling;
+
+      Promise.race([p1, p2, p3])
+        .then(result => {
+          showResult(resultDiv, result);
+          showExplanation(resultDiv, "Promise.race() devuelve la PRIMERA promesa que se resuelve o se rechaza. En este caso, el error fue el más rápido en ejecutarse.");
+        })
+        .catch(error => {
+          showResult(resultDiv, error);
+          showExplanation(resultDiv, "se mostro la promesa3 porque en comparacion a las demas es la primera en ejecutarse.");
+        });
+    }
+
+    function runAnyExample(button) {
+      const p1 = new Promise((_, reject) => setTimeout(reject, 300, '❌ Error 1'));
+      const p2 = new Promise((resolve) => setTimeout(resolve, 500, '🎉 Éxito'));
+      const p3 = new Promise((_, reject) => setTimeout(reject, 700, '❌ Error 2'));
+
+      const resultDiv = button.nextElementSibling;
+
+      Promise.any([p1, p2, p3])
+        .then(result => {
+          showResult(resultDiv, result);
+          showExplanation(resultDiv, "Promise.any() ignora todos lo errores, arroja error en caso de que todas las promesas sean error");
+        })
+        .catch(error => {
+          showResult(resultDiv, error.errors);
+          showExplanation(resultDiv, "Promise.any() devuelve un error solo si TODAS las promesas fallan.");
+        });
+    }
+
+    function runAllExample(button) {
+      const p1 = new Promise((resolve) => setTimeout(resolve, 1000, '✅ Éxito 1'));
+      const p2 = new Promise((resolve) => setTimeout(resolve, 500, '✅ Éxito 2'));
+      const p3 = new Promise((_, reject) => setTimeout(reject, 300, '❌ Error'));
+
+      const resultDiv = button.nextElementSibling;
+
+      Promise.all([p1, p2, p3])
+        .then(result => {
+          showResult(resultDiv, result);
+          showExplanation(resultDiv, "Promise.all() requiere que todas las promesas se cumplan. Si alguna falla, devuelve ese error.");
+        })
+        .catch(error => {
+          showResult(resultDiv, error);
+          showExplanation(resultDiv, "Se ejecuta hasta que encuentra un error, en caso de que todas las promesas fueran exitosas devolveria un array con los resultados.");
+        });
+    }
+
+    function showResult(container, value) {
+      container.innerHTML = `<strong>🧪 Resultado:</strong> <pre>${JSON.stringify(value, null, 2)}</pre>`;
+    }
+
+    function showExplanation(container, explanation) {
+      const explanationDiv = document.createElement('div');
+      explanationDiv.innerHTML = `<strong>📚 Explicación:</strong> <p>${explanation}</p>`;
+      container.appendChild(explanationDiv);
+    }
+  </script>
+</body>
+</html>
